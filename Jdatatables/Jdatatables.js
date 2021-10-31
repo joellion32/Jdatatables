@@ -15,7 +15,7 @@ class DataTable {
     headerButtons;
 
     //crear constructor asignar valores 
-    constructor(selector, headerButtons) {
+    constructor(selector, options, headerButtons) {
         this.element = document.querySelector(selector);
 
         this.headers = [];
@@ -35,9 +35,14 @@ class DataTable {
         this.selected = [];
         this.numberOfEntries = 5;
         this.headerButtons = headerButtons;
-
+        this.options = {
+            tableHeaderBackground: options.tableHeaderBackground,
+            tableHeaderTextColor: options.tableHeaderTextColor
+        };
 
     }
+
+
 
     //obtener los elementos de la tabla y destructurizarlos a un objeto
     parse() {
@@ -51,32 +56,32 @@ class DataTable {
 
 
         //recorrer los elementos tr
-        if(trs.length > 0){
+        if (trs.length > 0) {
             trs.forEach(tr => {
-            const cells = [...tr.children]
+                const cells = [...tr.children]
 
-            const item = {
-                id: this.generateUUID(),
-                values: []
-            }
+                const item = {
+                    id: this.generateUUID(),
+                    values: []
+                }
 
-            cells.forEach(cell => {
-                if (cell.children.length > 0) {
-                    const statusElement = [...cell.children][0]
-                    const status = statusElement.getAttribute('class')
+                cells.forEach(cell => {
+                    if (cell.children.length > 0) {
+                        const statusElement = [...cell.children][0]
+                        const status = statusElement.getAttribute('class')
 
-                    if (status !== null) {
-                        item.values.push(`<span class='${status}'></span>`)
+                        if (status !== null) {
+                            item.values.push(`<span class='${status}'></span>`)
+                        } else {
+                            item.values.push(cell.textContent)
+                        }
                     } else {
                         item.values.push(cell.textContent)
                     }
-                } else {
-                    item.values.push(cell.textContent)
-                }
-            });
+                });
 
-            this.items.push(item)
-        });
+                this.items.push(item)
+            });
         }
         this.makeTable()
     }
@@ -120,14 +125,11 @@ class DataTable {
     }
 
     createHTML() {
+        
         this.element.innerHTML =
             `
     <div class="datatable-container">
     <div class="header-tools">
-        <div class="tools">
-            <ul class="header-buttons-container"></ul>
-        </div>
-
         <div class="search">
             <input type="search" placeholder="Buscar..." class="search-input" />
         </div>
@@ -150,15 +152,18 @@ class DataTable {
         <div class="pages"></div>
     </div>
 </div>
-            `
-    }
+`   
+}
 
     //renderizar header de la tabla
     renderHeaders() {
         this.element.querySelector('thead tr').innerHTML = '';
 
         this.headers.forEach(header => {
-            this.element.querySelector('thead tr').innerHTML += `<th>${header}</th>`
+            this.element.querySelector('thead tr').innerHTML += 
+            `<th style="background-color: ${this.options.tableHeaderBackground} 
+            !important; color: ${this.options.tableHeaderTextColor} 
+            !important">${header}</th>`
         })
     }
 
@@ -181,6 +186,7 @@ class DataTable {
             })
 
             this.element.querySelector('tbody').innerHTML += `<tr>${data}</tr>`
+
         }
     }
 
@@ -211,17 +217,17 @@ class DataTable {
             pages += this.getIteratedButtons(limI, this.pagination.noPages)
         }
         pagesContainer.innerHTML = `<ul>${pages}</ul>`;
-    
+
         //obtener eventos de los botones y filtar la informacion
         this.element.querySelectorAll('.pages li button').forEach(button => {
             button.addEventListener('click', e => {
                 this.pagination.actual = parseInt(e.target.getAttribute('data-page'));
-                this.pagination.pointer = (this.pagination.actual * this.pagination.noItemsPerPage) - this.pagination.noItemsPerPage; 
+                this.pagination.pointer = (this.pagination.actual * this.pagination.noItemsPerPage) - this.pagination.noItemsPerPage;
                 this.renderRows()
                 this.renderPagesButtons();
             })
         })
-    
+
     }
 
     //dibujar los botones de inicio y ultimo cuando la cantidad de registros es mucha
@@ -244,19 +250,19 @@ class DataTable {
         const buttonsContainer = this.element.querySelector('.header-buttons-container')
         const headerButtons = this.headerButtons;
         headerButtons.forEach(button => {
-           html += `
+            html += `
            <li>
                 <button id="${button.id}">
                     <i class="material-icons">${button.icon}</i>
                 </button>
            </li>
-           ` 
-           buttonsContainer.innerHTML = html;
+           `
+            buttonsContainer.innerHTML = html;
         })
 
 
-         //obtener lista de botones y los eventos
-         headerButtons.forEach(button => {
+        //obtener lista de botones y los eventos
+        headerButtons.forEach(button => {
             //obtener listener y pasar accion
             document.querySelector(`#${button.id}`).addEventListener('click', button.action);
         });
@@ -264,54 +270,59 @@ class DataTable {
     }
 
     //renderizar registros para la busqueda 
-    renderSearch() { 
-            this.element.querySelector('.search-input').addEventListener('input', e=> {
+    renderSearch() {
+        this.element.querySelector('.search-input').addEventListener('input', e => {
             const query = e.target.value.trim().toLowerCase();
-            
-            if(query === ''){
+
+            if (query === '') {
                 this.copyItems = [... this.items];
                 this.initPagination(this.copyItems.length, this.numberOfEntries);
                 this.renderRows();
                 this.renderPagesButtons();
                 return;
             }
-            
+
             this.search(query)
             this.initPagination(this.copyItems.length, this.numberOfEntries)
             this.renderRows();
             this.renderPagesButtons();
-        
+
         })
     }
 
     //mapear las colleciones segun el parametro que reciba la funcion  
-    search(query){
+    search(query) {
         let res = [];
         this.copyItems = [...this.items]
-        for(let i = 0; i < this.copyItems.length; i++){
-            const {id, values} = this.copyItems[i];
+        for (let i = 0; i < this.copyItems.length; i++) {
+            const { id, values } = this.copyItems[i];
             const row = values;
 
-            for(let j = 0; j < row.length; j++){
+            for (let j = 0; j < row.length; j++) {
                 const cell = row[j];
-                if(cell.toLowerCase().indexOf(query) >= 0){
+                if (cell.toLowerCase().indexOf(query) >= 0) {
                     res.push(this.copyItems[i])
                     break;
                 }
             }
         }
 
-        this.copyItems = [...res];
+        if (res.length <= 0) {
+            this.copyItems = []
+            this.element.querySelector('tbody').innerHTML = `<tr>No hay elementos</tr>`
+        } else {
+            this.copyItems = [...res];
+        }
+
     }
 
     //filtrar por cantidad de entradas
-    renderSelectedEntries() { 
+    renderSelectedEntries() {
         const select = this.element.querySelector("#n-entries");
 
         const html = [5, 10, 15].reduce((acc, item) => {
-            return (acc += `<option value="${item}" ${
-                this.numberOfEntries === item ? "selected" : ""
-            }>${item}</option>`);
+            return (acc += `<option value="${item}" ${this.numberOfEntries === item ? "selected" : ""
+                }>${item}</option>`);
         }, "");
 
         select.innerHTML = html;
@@ -334,7 +345,7 @@ class DataTable {
     //#endregion
 
     //agregar elemento
-    addItem(item){
+    addItem(item) {
         const row = {
             id: this.generateUUID(),
             values: []

@@ -490,24 +490,24 @@
     <script src="Jdatatables/Jdatatables.js"></script>
 
     <script>
-        const dt = new DataTable('#datatable', [{
-            id: 'btnADD',
-            icon: 'delete',
-            text: 'delete'
-        }]);
-
-
-        fetch('http://localhost:3000/photos')
-        .then(resp => resp.json())
-        .then(data => {
-            var items = data.collections;
-
-            items.forEach(element => {
-                // dt.addItem([element.albumId, element.id, element.title, element.url, element.thumbnailUrl])
-            });
-        })
-
-        dt.parse()
+        const dt = new DataTable('#datatable',
+        //add options 
+        {
+            tableHeaderBackground: 'black',
+            tableHeaderTextColor: 'white'
+        },
+        // add buttons
+        [
+            // {
+            // id: 'btnADD',
+            // icon: 'delete',
+            // text: 'delete'
+            // }
+        ]
+        
+        );
+        
+          dt.parse()
     </script>
 </body>
 
