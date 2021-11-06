@@ -14,7 +14,7 @@ class DataTable {
     numberOfEntries;
     headerButtons;
 
-    //crear constructor asignar valores 
+    //crear constructor asignar valores
     constructor(selector, options, headerButtons) {
         this.element = document.querySelector(selector);
 
@@ -37,7 +37,8 @@ class DataTable {
         this.headerButtons = headerButtons;
         this.options = {
             tableHeaderBackground: options.tableHeaderBackground,
-            tableHeaderTextColor: options.tableHeaderTextColor
+            tableHeaderTextColor: options.tableHeaderTextColor, 
+            paginationActiveBackground: options.paginationActiveBackground
         };
 
     }
@@ -104,7 +105,7 @@ class DataTable {
     }
 
 
-    //#region -> funciones para renderizado  
+    //#region -> funciones para renderizado
     makeTable() {
         this.copyItems = [...this.items];
         this.initPagination(this.items.length, this.numberOfEntries);
@@ -122,10 +123,11 @@ class DataTable {
         this.renderHeaderButtons();
         this.renderSearch();
         this.renderSelectedEntries();
+        this.changeHoverButtons();
     }
 
     createHTML() {
-        
+
         this.element.innerHTML =
             `
     <div class="datatable-container">
@@ -152,17 +154,17 @@ class DataTable {
         <div class="pages"></div>
     </div>
 </div>
-`   
-}
+`
+    }
 
     //renderizar header de la tabla
     renderHeaders() {
         this.element.querySelector('thead tr').innerHTML = '';
 
         this.headers.forEach(header => {
-            this.element.querySelector('thead tr').innerHTML += 
-            `<th style="background-color: ${this.options.tableHeaderBackground} 
-            !important; color: ${this.options.tableHeaderTextColor} 
+            this.element.querySelector('thead tr').innerHTML +=
+                `<th style="background-color: ${this.options.tableHeaderBackground}
+            !important; color: ${this.options.tableHeaderTextColor}
             !important">${header}</th>`
         })
     }
@@ -190,7 +192,7 @@ class DataTable {
         }
     }
 
-    //renderizar botones de paginacion 
+    //renderizar botones de paginacion
     renderPagesButtons() {
         const pagesContainer = this.element.querySelector('.pages');
         let pages = '';
@@ -208,7 +210,7 @@ class DataTable {
             limS = limS + missingButtons;
         }
 
-        // mostrar ultimo boton activo 
+        // mostrar ultimo boton activo
         if (limS < (this.pagination.noPages - 2)) {
             pages += this.getIteratedButtons(limI, limS)
             pages += `<li>...</li>`;
@@ -225,9 +227,11 @@ class DataTable {
                 this.pagination.pointer = (this.pagination.actual * this.pagination.noItemsPerPage) - this.pagination.noItemsPerPage;
                 this.renderRows()
                 this.renderPagesButtons();
+                console.log(`Mostrando ${this.numberOfEntries} a ${this.pagination.pointer} de ${this.copyItems.length}`)
             })
         })
 
+        //cambiar colores hover de los botones 
     }
 
     //dibujar los botones de inicio y ultimo cuando la cantidad de registros es mucha
@@ -235,13 +239,27 @@ class DataTable {
         let res = '';
         for (let i = start; i <= end; i++) {
             if (i === this.pagination.actual) {
-                res += `<li><span class="active">${i}</span></li>`
+                res += `<li><span style="background-color: ${this.options.paginationActiveBackground}; color: ${this.options.tableHeaderTextColor}" class="active">${i}</span></li>`
             } else {
                 res += `<li><button data-page="${i}">${i}</button></li>`
             }
         }
 
         return res;
+    }
+
+    //cambiar colores hover de los botones 
+    changeHoverButtons() {
+        var css = `.datatable-container .footer-tools .pages ul li button:hover{color: ${this.options.tableHeaderTextColor}; background-color: ${this.options.paginationActiveBackground} }`;
+        var style = document.createElement('style');
+
+        if (style.styleSheet) {
+            style.styleSheet.cssText = css;
+        } else {
+            style.appendChild(document.createTextNode(css));
+        }
+
+        document.getElementsByTagName('head')[0].appendChild(style);
     }
 
     //renderizar botones personalizados para agregar al usuario
@@ -269,7 +287,7 @@ class DataTable {
 
     }
 
-    //renderizar registros para la busqueda 
+    //renderizar registros para la busqueda
     renderSearch() {
         this.element.querySelector('.search-input').addEventListener('input', e => {
             const query = e.target.value.trim().toLowerCase();
@@ -290,7 +308,7 @@ class DataTable {
         })
     }
 
-    //mapear las colleciones segun el parametro que reciba la funcion  
+    //mapear las colleciones segun el parametro que reciba la funcion
     search(query) {
         let res = [];
         this.copyItems = [...this.items]

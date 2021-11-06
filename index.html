@@ -12,7 +12,7 @@
 
 <body>
 
-
+    <h1>Lista de usuarios</h1>
     <table id="datatable">
         <thead>
             <tr>
@@ -493,8 +493,9 @@
         const dt = new DataTable('#datatable',
         //add options 
         {
-            tableHeaderBackground: 'black',
-            tableHeaderTextColor: 'white'
+            tableHeaderBackground: 'white',
+            tableHeaderTextColor: 'black',
+            paginationActiveBackground: '#f2f2f2'
         },
         // add buttons
         [
