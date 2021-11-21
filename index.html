@@ -24,10 +24,7 @@
                 <th>price</th>
             </tr>
         </thead>
-        <!-- <tbody>
-
-        </tbody> -->
-        <tbody> 
+        <tbody>
             <tr>
                 <td>Tiger Nixon</td>
                 <td>System Architect</td>
@@ -484,31 +481,36 @@
                 <td>2011/01/25</td>
                 <td>$112,000</td>
             </tr>
-        </tbody> 
+        </tbody>
     </table>
 
     <script src="Jdatatables/Jdatatables.js"></script>
 
     <script>
         const dt = new DataTable('#datatable',
-        //add options 
-        {
-            tableHeaderBackground: 'white',
-            tableHeaderTextColor: 'black',
-            paginationActiveBackground: '#f2f2f2'
-        },
-        // add buttons
-        [
-            // {
-            // id: 'btnADD',
-            // icon: 'delete',
-            // text: 'delete'
-            // }
-        ]
-        
-        );
-        
-          dt.parse()
+            //add options 
+            {
+                activeTableButtons: false,
+                tableHeaderBackground: '#264E72',
+                tableHeaderTextColor: 'white',
+                paginationActiveBackground: '#264E72',
+                extractApi: {
+                    activeFetch: true,
+                    method: 'GET',
+                    dataType: 'json',
+                    url: 'https://avanisoftrd.com/inventory/get_products',
+                },
+                tableButtons: [{
+                    id: 'btnADD',
+                    icon: 'delete',
+                    text: 'delete',
+                    action: () => {
+                        alert('Hola')
+                    }
+                }]
+            });
+
+        dt.parse()
     </script>
 </body>
 
